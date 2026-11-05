@@ -1,17 +1,63 @@
 # solar_resource_assesment_group15
 poster session project something
 
+# Solar forecast evaluation – station 06123
+
+## Files
+
+| File | What it is |
+|---|---|
+| `data_QC_check.ipynb` | Downloads DMI measurements (solarpy), runs the QC checks, resamples to hourly and saves `dmi_06123_hourly_qc.csv` |
+| `dmi_06123_hourly_qc.csv` | **Measured** hourly GHI (output of the QC notebook) |
+| `Forecast data/06123_YYYYMMDDTHHMM.csv` | **Forecasts** from 8 NWP models. The file name is the issue time in UTC |
+| `forecast_evaluation.ipynb` | Compares all forecasts with the measurements and produces the poster figures |
+
+## Folder layout
+
+```
+project/
+├── data_QC_check.ipynb
+├── forecast_evaluation.ipynb
+├── dmi_06123_hourly_qc.csv
+└── Forecast data/
+    ├── 06123_20261103T1500.csv
+    ├── 06123_20261103T1600.csv
+    └── ...
+```
+
+## How to run
+
+1. **Update the measurements.** In `data_QC_check.ipynb`, set the end date to today, run all cells and save `dmi_06123_hourly_qc.csv`.
+   Resample with `label='right', closed='right'`, because the timestamps are right-labeled.
+2. **Add the forecast files.** Copy all `06123_*.csv` files into `Forecast data/`. More files give more reliable scores.
+3. **Run `forecast_evaluation.ipynb`** (Run All). Then check:
+   - Section 3a: if a file is flagged (forecast at night or far above clear sky), add it to `bad_files` and run again.
+     `06123_20261103T1100.csv` is known to be bad.
+   - "Forecast/measurement pairs used" must be above 0. If it is 0, the measurements don't reach past the forecast issue times, so go back to step 1.
+
+## What the notebook gives you
+
+- **Sections 4–5:** forecast vs. measured plots, and RMSE and bias per model and forecast horizon (saved to `scores_all_models.csv` and `daily_scores_all_models.csv`).
+- **Section 6:** errors on clear, broken-cloud and overcast days.
+- **Section 7:** the blended forecast for the competition.
+
+## Notes
+
+- Only daytime hours are used (sun elevation > 0), so the night-time zeros don't make the errors look smaller.
+- `dmi_harmonie_arome_europe` and `dmi_seamless` are **forecasts**. Only `dmi_06123_hourly_qc.csv` is measured data.
+- The `_seamless` models are built from other models, so they are not independent forecasts.
+- Harmonie and MetNo Nordic only forecast ~2.5 days ahead, so compare models per horizon, not only on overall scores.
 
 
-Project description
+## Project GUIDELINES
 For the forecasting assignment, you will compare different forecast models and evaluate how forecast accuracy changes with forecast horizon.
 
-Groups
+# Groups
 For the assignment, you have to pair up in groups of two. Please self-enroll in a group on DTU Learn. If you cannot find a group member, please email arajen@dtu.dk.
 
 Each group will be assigned a different weather station, where you will assess the forecast. The weather stations are all located in Denmark and operated by the Danish Meteorological Institute (DMI). The station assigned to each group can be found here. See this page for metadata for the different stations (such as the location and station name).
 
-Measurement data
+# Measurement data
 The accuracy of a forecast model can be assessed by comparing forecasts with actual measured ground-measured irradiance. Most solar irradiance forecasting models output global horizontal irradiance (GHI), which is what we will assess in this project.
 
 As the first step, you should retrieve measurements of solar irradiance measurements from DMI using the solarpy Python package. The package is not on PyPI, so you have to run the following command to install the package:
@@ -23,7 +69,7 @@ Once you have retrieved measurement data, you should quality control the data. T
 
 The DMI measurements have a 10-minute frequency, whereas the forecast data are hourly. You will therefore need to resample the measurement data to 1-hour average values to match the forecast timestamps. The measurement data is in UTC and right-labeled, meaning the timestamp 10:20 corresponds to the average value from 10:11 to 10:20. When resampling, ensure that you select the correct options for the label and closed parameters!
 
-Forecast data
+# Forecast data
 Forecasts of GHI have been retrieved for each DMI station at each hour of the day starting on 2026-11-03. Forecasts have been retrieved from 8 different NWP models from open-meteo.com. The forecast files are available in the folder called "Forecast data". Additional forecast files will be uploaded continuously until 2026-11-27.
 
 The forecast file name indicates the station and the time at which the forecast was retrieved. For example, the file "06031_20261109T0600.csv" contains the forecast for station 06031 (Tylstrup) and was retrieved at 6:00 am UTC on November 9th 2026. The forecast timestamps are in UTC, and the values are right-binned, meaning that the data point with the timestamp 02:00 is the average value for the period 01:01 to 02:00.
@@ -32,18 +78,16 @@ Each forecast file contains hourly forecasts of GHI for the next 7 days. Each co
 
 Once you've retrieved the measurement data, you should load the forecast data into Python or your preferred data analytics tool. Make sure to visually inspect the forecast and measured data. Do the forecasts look good? Do some models look better than others?
 
-Quantifying forecast accuracy
+# Quantifying forecast accuracy
 Once you have parsed the forecast data files and the measurements data, you can then begin quantifying the accuracy of the forecasting models. Several metrics can be used to quantify forecast error, each with its own strengths and limitations. In this assignment, we will evaluate forecast accuracy using two metrics: Root Mean Square Error (RMSE) and Bias.
 
 You will calculate these error metrics for each forecast model and for every forecast horizon (e.g., forecast horizons of 1 hour, 2 hours, and so on). To do this, you have to compare the measured values from your DMI station with the forecasted values from the NWP models.
 
 For example, when assessing the 1-hour forecast horizon, use the first hour from each forecast file to compute RMSE and Bias. Repeat this process for 2-hour, 3-hour forecasts, and so on. For each metric, you will need to use forecast data from all forecast files corresponding to your station.
 
- 
-
 Forecast metrics as a function of forecast horizon.
 
-Poster presentation
+# Poster presentation
 The results from your forecast comparison will be presented at the poster session on December 1st from 1:00 to 5:00 p.m. Each group will give a 5-minute presentation of their poster, with the time split evenly between the two group members. It is mandatory to attend the poster session.
 
 Your poster should include the following:
@@ -56,12 +100,12 @@ Each group will need to print their poster in size A0, which can be done at the 
 
 The poster should be uploaded to DTU Learn before the poster presentation.
 
-Forecast competition
+# Forecast competition
 As mentioned in the lecture notes, it is possible to make a better forecast by blending/combining different forecasts. Make an attempt to combine different forecasts (e.g., 80% Model A and 20% Model B) to improve the forecast scores. Based on the best method you derived, you will make your own blended forecast 4 days ahead for DTU for the period from the 28th of November to the 1st of December.
 
 You will need to submit this blended forecast on Learn before Friday, the 27th at 23:59. The forecast files for DTU will be provided to you, meaning you will only need to apply your blending method and submit the forecast on DTU Learn.
 
 The forecast should be submitted in the CSV format with the first column corresponding to the date/time in the format of (2025-11-29 02:00+00:00). The file name should be your group number, e.g., "Group3.csv".
 
-Grading
+# Grading
 Your final grade for the course will be a combination of your mid-term quiz score (66%) and the poster presentation (34%). For the poster presentation, the grading will focus on your communication (presentation, poster design, etc.), how well you assessed the forecasts, as well as your ability to reflect on the project (e.g., did the forecast rank as expected, what would you have done differently?). You will not be graded on how well you perform in the forecast competition, but it is mandatory to submit a forecast.

@@ -1,7 +1,5 @@
-# solar_resource_assesment_group15
-poster session project something
 
-# Solar forecast evaluation – station 06123
+## Solar forecast evaluation – station 06123, group 15
 
 ## Files
 
